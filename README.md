@@ -17,6 +17,7 @@
 | `communication.md` | Итог первой строкой; читаемость важнее краткости; форма под вопрос; калибровка под читателя; обязательные элементы отчёта |
 | `code-quality.md` | Согласованность с проектом; дисциплина комментариев; простота против абстракций «на вырост»; надёжность внешних вызовов; безопасность |
 | `debugging.md` | Порядок от симптома к причине: воспроизвести → гипотезы → наблюдение → точечная правка → повторить сценарий; ловушка узнавания; запрет shotgun debugging; типовые причины по стеку |
+| `git.md` | Гигиена коммитов и `.gitignore` до первого коммита; атомарные коммиты и внятные сообщения; ветки и откаты (`revert` vs `reset`); утёкшие токены; деплой через `git pull` без правок на сервере |
 
 **`references/` — стек** (проверенные паттерны, модель сверяется до написания кода):
 
@@ -36,7 +37,17 @@
 
 ## Установка
 
-**Claude Code:**
+### Claude Code
+
+**Windows (PowerShell):**
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.claude\skills\fable5-style" | Out-Null
+Copy-Item SKILL.md "$HOME\.claude\skills\fable5-style\"
+Copy-Item -Recurse -Force references "$HOME\.claude\skills\fable5-style\references"
+```
+
+**Linux / macOS:**
 
 ```bash
 mkdir -p ~/.claude/skills/fable5-style
@@ -44,7 +55,21 @@ cp SKILL.md ~/.claude/skills/fable5-style/
 cp -r references ~/.claude/skills/fable5-style/
 ```
 
-**Claude.ai / приложение Claude:** упакуйте скилл в zip и отправьте в чат, затем нажмите **Save skill** на карточке файла:
+### Claude.ai / приложение Claude (Desktop)
+
+Упакуйте скилл в архив и отправьте его в любой чат Claude, затем нажмите **Save skill** на карточке файла. Если старая версия уже установлена — сначала удалите её в настройках, чтобы не было дубля.
+
+**Windows (PowerShell):**
+
+```powershell
+New-Item -ItemType Directory -Force fable5-style | Out-Null
+Copy-Item SKILL.md fable5-style\
+Copy-Item -Recurse -Force references fable5-style\references
+Compress-Archive -Path fable5-style -DestinationPath fable5-style.zip -Force
+Rename-Item fable5-style.zip fable5-style.skill -Force
+```
+
+**Linux / macOS:**
 
 ```bash
 mkdir fable5-style && cp SKILL.md fable5-style/ && cp -r references fable5-style/
@@ -63,6 +88,7 @@ Claude-Fable-5/
     ├── communication.md      # поведение: формат ответов
     ├── code-quality.md       # поведение: качество кода
     ├── debugging.md          # поведение: отладка
+    ├── git.md                # поведение: дисциплина git
     ├── aiogram3.md           # стек: aiogram 3 + SQLAlchemy 2 async
     ├── telegram-miniapp.md   # стек: Mini Apps + FastAPI
     ├── payments.md           # стек: Stars и провайдеры

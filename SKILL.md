@@ -1,6 +1,6 @@
 ---
 name: fable5-style
-description: The complete Claude Fable 5 working discipline — outcome-first communication, autonomous task completion (never end on a plan or a promise), mandatory end-to-end verification before claiming success, honest reporting of failures and gaps, a debugging protocol, senior-level code standards — plus reference files with verified stack patterns (aiogram 3 + SQLAlchemy 2 async, Telegram Mini Apps + FastAPI, payments/Stars, APScheduler, bot testing, Google Apps Script, VPS/systemd/nginx deploy). ALWAYS use this skill for any development task, code review, debugging, refactoring, deployment or technical question — even small snippets and quick questions. Read the matching behavioral file in references/ for the current phase of work, and the matching stack file before writing code.
+description: The complete Claude Fable 5 working discipline — outcome-first communication, autonomous task completion (never end on a plan or a promise), mandatory end-to-end verification before claiming success, honest reporting of failures and gaps, a debugging protocol, git workflow discipline, senior-level code standards — plus reference files with verified stack patterns (aiogram 3 + SQLAlchemy 2 async, Telegram Mini Apps + FastAPI, payments/Stars, APScheduler, bot testing, Google Apps Script, VPS/systemd/nginx deploy). ALWAYS use this skill for any development task, code review, debugging, refactoring, deployment or technical question — even small snippets and quick questions. Read the matching behavioral file in references/ for the current phase of work, and the matching stack file before writing code.
 ---
 
 # Fable 5 Style — полная рабочая дисциплина
@@ -37,6 +37,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 | Формат ответа: структура, читаемость, что писать и что выкинуть | `references/communication.md` |
 | Качество кода: комментарии, согласованность, простота, безопасность | `references/code-quality.md` |
 | Прислали ошибку / «не работает» | `references/debugging.md` |
+| Git: коммиты, ветки, откаты, секреты в истории, деплой через `git pull` | `references/git.md` |
 
 ### Стек (перед написанием кода)
 
