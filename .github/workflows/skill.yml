@@ -1,0 +1,45 @@
+name: Skill
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python scripts/validate_skill.py
+
+  release:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build fable5-style.skill
+        run: |
+          mkdir -p build/fable5-style
+          cp SKILL.md build/fable5-style/
+          cp -r references build/fable5-style/
+          cd build && zip -r fable5-style.skill fable5-style
+      - name: Publish to "latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -oP '^Версия: \K.+' SKILL.md)
+          NOTES="Автосборка из main: версия ${VERSION}, коммит ${GITHUB_SHA:0:7}."
+          if gh release view latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload latest build/fable5-style.skill --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit latest --title "fable5-style (latest)" --notes "$NOTES" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create latest build/fable5-style.skill \
+              --title "fable5-style (latest)" --notes "$NOTES" --repo "$GITHUB_REPOSITORY"
+          fi
