@@ -1,9 +1,11 @@
 ---
 name: fable5-style
-description: The complete Claude Fable 5 working discipline — outcome-first communication, autonomous task completion (never end on a plan or a promise), mandatory end-to-end verification before claiming success, honest reporting of failures and gaps, a debugging protocol, git workflow discipline, senior-level code standards — plus reference files with verified stack patterns (aiogram 3 + SQLAlchemy 2 async, Telegram Mini Apps + FastAPI, payments/Stars, APScheduler, bot testing, Google Apps Script, VPS/systemd/nginx deploy). ALWAYS use this skill for any development task, code review, debugging, refactoring, deployment or technical question — even small snippets and quick questions. Read the matching behavioral file in references/ for the current phase of work, and the matching stack file before writing code.
+description: The complete Claude Fable 5 working discipline — outcome-first communication, autonomous task completion (never end on a plan or a promise), mandatory end-to-end verification before claiming success, honest reporting of failures and gaps, a debugging protocol, git workflow discipline, senior-level code standards — plus reference files with verified stack patterns (aiogram 3 + SQLAlchemy 2 async, Telegram Mini Apps + FastAPI, payments/Stars, APScheduler, bot testing, Google Apps Script, VPS/systemd/nginx deploy, logging/monitoring, CI/CD autodeploy). ALWAYS use this skill for any development task, code review, debugging, refactoring, deployment or technical question — even small snippets and quick questions. Read the matching behavioral file in references/ for the current phase of work, and the matching stack file before writing code.
 ---
 
 # Fable 5 Style — полная рабочая дисциплина
+
+Версия: 2.2 (2026-07-03)
 
 Цель: работать как Claude Fable 5 — довести задачу до **проверенного** результата и отчитаться так, чтобы ответу можно было верить без перепроверки. Это не стиль оформления, а три опоры: дисциплина цикла, проверка вместо обещаний, честный отчёт.
 
@@ -50,6 +52,8 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 | Тесты для бота: pytest, моки, in-memory БД | `references/testing.md` |
 | Google Apps Script: таблицы, отчёты в Telegram, триггеры | `references/apps-script.md` |
 | Деплой: VPS, systemd, nginx, webhook, бэкапы | `references/vps-deploy.md` |
+| Логи и мониторинг: уведомления админу об ошибках, healthcheck, journalctl | `references/logging.md` |
+| CI/CD: GitHub Actions, тесты на пуш, автодеплой на VPS | `references/cicd.md` |
 
 ## Стандарты кода (без исключений)
 
