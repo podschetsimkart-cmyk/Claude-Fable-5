@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Модель для живого прогона evals"
+        default: "claude-opus-4-8"
+      skill:
+        description: "Скилл включён (on/off)"
+        default: "on"
 
 jobs:
   validate:
@@ -15,6 +23,30 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python scripts/validate_skill.py
+      - name: Eval harness self-test
+        run: python evals/run_evals.py --dry-run
+
+  evals:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Live eval run
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python evals/run_evals.py \
+            --model "${{ inputs.model }}" --skill "${{ inputs.skill }}" \
+            --repeats 3 --report eval-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report-${{ inputs.model }}-skill-${{ inputs.skill }}
+          path: eval-report.json
 
   release:
     needs: validate
