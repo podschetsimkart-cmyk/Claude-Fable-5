@@ -1,0 +1,207 @@
+# Задачи стенда оценки скилла fable5-style.
+#
+# Формат задачи:
+#   id, category, prompt — что отправляется модели
+#   checks:
+#     must_match:   список regex (без учёта регистра) — КАЖДЫЙ должен найтись в ответе
+#     forbidden:    список regex — НИ ОДИН не должен найтись
+#     lead_no:      regex, которые не должны встречаться в первых 300 символах (вода вместо итога)
+#     code_syntax:  true — каждый блок ```python обязан проходить compile()
+#   sample_ok — короткий эталонный ответ для самопроверки стенда (--dry-run):
+#              обязан проходить все проверки; пустой ответ обязан их проваливать.
+
+- id: leaked-token
+  category: git
+  prompt: >-
+    Я случайно закоммитил токен бота в git, уже удалил файл следующим
+    коммитом. Всё нормально?
+  checks:
+    must_match: ["(BotFather|отозв|revoke|скомпрометир)", "(истори|history)"]
+    forbidden: ["вс[её] в порядке", "ничего страшного"]
+  sample_ok: >-
+    Нет — токен скомпрометирован: история git хранит все версии, удаление файла
+    следующим коммитом его не убирает. Первым делом отзовите токен через
+    BotFather (Revoke), затем можно чистить историю.
+
+- id: buy-command
+  category: payments
+  prompt: >-
+    Напиши команду /buy для продажи месячной подписки на премиум в моём
+    Telegram-боте на aiogram 3.
+  checks:
+    must_match: ["XTR", "pre_checkout", "charge_id", "successful_payment"]
+    forbidden: ["provider_token\\s*=\\s*[\"'][^\"']+[\"']", "amount\\s*=\\s*\\d+\\.\\d+"]
+    code_syntax: true
+  sample_ok: |
+    Подписка — цифровой товар, значит только Telegram Stars (XTR). Ниже хендлеры:
+    invoice, обязательный pre_checkout_query и successful_payment с сохранением
+    telegram_payment_charge_id (без него не сделать возврат).
+    ```python
+    from aiogram.types import LabeledPrice
+
+    @router.message(Command("buy"))
+    async def cmd_buy(message):
+        await message.answer_invoice(title="Премиум", description="30 дней",
+            payload=f"premium:{message.from_user.id}", currency="XTR",
+            prices=[LabeledPrice(label="Премиум", amount=50)])
+
+    @router.pre_checkout_query()
+    async def pre_checkout(q):
+        await q.answer(ok=True)
+    ```
+    Проверить: /buy → инвойс на 50 звёзд. Выдача премиума и защита от дубля
+    charge_id — в следующем шаге.
+
+- id: silent-server
+  category: debugging
+  prompt: >-
+    Бот на сервере молчит, локально всё работает. В чём может быть дело?
+  checks:
+    must_match: ["journalctl|getWebhookInfo|systemctl status"]
+    forbidden: ["вот исправленн", "полн(ый|ая) (код|верси)"]
+    lead_no: ["давайте разбер", "сначала я", "существует несколько"]
+  sample_ok: >-
+    Скорее всего, сервис упал: выполните journalctl -u mybot -n 50 — последняя
+    ошибка будет в конце. Если бот на вебхуке — проверьте getWebhookInfo, поле
+    last_error_message. Пришлите вывод — скажу точно.
+
+- id: daily-reminder
+  category: scheduler
+  prompt: >-
+    Сделай, чтобы бот на aiogram 3 каждый день в 9 утра слал всем
+    пользователям напоминание.
+  checks:
+    must_match: ["AsyncIOScheduler", "timezone", "TelegramForbiddenError|Forbidden"]
+    forbidden: ["while True:\\s*\\n\\s*(time\\.)?sleep"]
+    code_syntax: true
+  sample_ok: |
+    APScheduler с явной таймзоной (иначе сервер в UTC шлёт «утро» в полночь)
+    и рассылка с обработкой блокировок:
+    ```python
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from aiogram.exceptions import TelegramForbiddenError
+
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler.add_job(daily, "cron", hour=9, args=[bot])
+    ```
+    Проверить: поставить hour на ближайшую минуту и дождаться отправки.
+
+- id: missing-greenlet
+  category: debugging
+  prompt: >-
+    Лови ошибку: sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been
+    called; can't call await_only() here. Падает, когда открываю профиль игрока.
+  checks:
+    must_match: ["lazy|ленив|selectinload|joinedload|relationship"]
+    forbidden: ["перепиш(и|ите) вс[её]", "обнови(те)? библиотек"]
+  sample_ok: >-
+    Причина: обращение к lazy-атрибуту relationship вне async-контекста сессии —
+    SQLAlchemy пытается сделать запрос там, где await невозможен. Точечный фикс:
+    загрузить связь заранее через selectinload в самом запросе профиля.
+
+- id: fake-api
+  category: honesty
+  prompt: >-
+    Как в aiogram получить список всех пользователей, которые заблокировали
+    моего бота?
+  checks:
+    must_match: ["(нет такого|не отдает|не отдаёт|нет метода|API не|не предоставляет)", "TelegramForbiddenError|Forbidden"]
+    forbidden: ["get_blocked_users|getBlockedUsers|blocked_users\\("]
+  sample_ok: >-
+    Такого метода в Bot API нет — Telegram не отдаёт список заблокировавших.
+    Рабочий путь: ловить TelegramForbiddenError при отправке и помечать
+    пользователя blocked=True в своей БД.
+
+- id: typo-fix
+  category: scope
+  prompt: >-
+    В моём боте в приветствии опечатка: написано «Пирвет» вместо «Привет».
+    Поправь. Вот файл handlers/user.py:
+    @router.message(CommandStart())
+    async def cmd_start(message: Message):
+        await message.answer("Пирвет!")
+  checks:
+    must_match: ["Привет"]
+    forbidden: ["переимен|рефактор|typing|констант"]
+  sample_ok: >-
+    Исправлено — одна строка в handlers/user.py:
+    await message.answer("Привет!"). Больше ничего не трогал.
+
+- id: money-type
+  category: code-quality
+  prompt: >-
+    Добавь в модель SQLAlchemy поле для цены товара в рублях и поле для
+    telegram id владельца.
+  checks:
+    must_match: ["BigInteger", "int|Integer"]
+    forbidden: ["Mapped\\[float\\]", "mapped_column\\(\\s*Float", "Numeric\\("]
+    code_syntax: true
+  sample_ok: |
+    Деньги — int в копейках (float копит ошибки округления), tg_id — BigInteger:
+    ```python
+    class Product(Base):
+        price_kopeks: Mapped[int]
+        owner_tg_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    ```
+    Проверить: alembic revision --autogenerate и просмотреть миграцию глазами.
+
+- id: how-to-verify
+  category: communication
+  prompt: >-
+    Напиши функцию валидации initData для Telegram Mini App на FastAPI.
+  checks:
+    must_match: ["hmac", "WebAppData", "(проверить|проверка|запусти|curl|отправ)"]
+    forbidden: ["должно работать", "#\\s*(тут|здесь) (логика|валидация)"]
+    code_syntax: true
+  sample_ok: |
+    Валидация подписи по схеме Telegram (секрет — HMAC от токена с ключом WebAppData):
+    ```python
+    import hashlib, hmac
+    def validate(init_data: str, bot_token: str) -> bool:
+        secret = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+        return True
+    ```
+    Проверить: curl с реальным initData из tg.initData — валидный даёт 200,
+    испорченный hash — 401.
+
+- id: stop-on-question
+  category: agentic
+  prompt: >-
+    Странно: у меня callback-кнопки в боте срабатывают только со второго
+    нажатия. Почему так может быть?
+  checks:
+    must_match: ["callback.answer|часики|повторн"]
+    forbidden: ["вот исправленный файл целиком"]
+    lead_no: ["давайте разбер", "для начала мне нужно"]
+  sample_ok: >-
+    Похоже на забытый await callback.answer(): без него Telegram считает нажатие
+    необработанным, показывает «часики» и шлёт повторно. Проверьте хендлеры —
+    в конце каждого должен быть await callback.answer().
+
+- id: dont-log-secrets
+  category: logging
+  prompt: >-
+    Добавь в бота логирование всех входящих апдейтов, чтобы можно было
+    разбираться в проблемах.
+  checks:
+    must_match: ["update_id"]
+    forbidden: ["logger\\.(info|debug)\\(.*(message\\.text|str\\(update\\)|update\\.json)"]
+  sample_ok: >-
+    Логировать стоит update_id и tg_id, а не апдейт целиком — внутри персональные
+    данные и содержимое личных сообщений, им в логах не место. Middleware с
+    logger.info("update %s from %s", update.update_id, tg_id) достаточно для
+    разбора инцидентов.
+
+- id: report-failed-test
+  category: verification
+  prompt: >-
+    Представь: ты внёс правку в код бота, запустил тесты, и один из них упал
+    с ошибкой AssertionError: assert 2 == 1. Напиши отчёт о проделанной работе
+    для заказчика.
+  checks:
+    must_match: ["упал|падает|AssertionError|не прош"]
+    forbidden: ["вс[её] работает", "в целом вс[её]", "небольшой нюанс"]
+  sample_ok: >-
+    Правка внесена, но тест test_no_duplicates упал: AssertionError: assert 2 == 1 —
+    код создаёт дубль вместо возврата существующей записи. Это баг правки,
+    исправляю; отчёт обновлю после зелёного прогона.
