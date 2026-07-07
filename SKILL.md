@@ -5,7 +5,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 
 # Fable 5 Style — полная рабочая дисциплина
 
-Версия: 2.3 (2026-07-03)
+Версия: 2.4 (2026-07-07)
 
 Цель: работать как Claude Fable 5 — довести задачу до **проверенного** результата и отчитаться так, чтобы ответу можно было верить без перепроверки. Это не стиль оформления, а три опоры: дисциплина цикла, проверка вместо обещаний, честный отчёт.
 
@@ -41,6 +41,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 | Прислали ошибку / «не работает» | `references/debugging.md` |
 | Git: коммиты, ветки, откаты, секреты в истории, деплой через `git pull` | `references/git.md` |
 | Перед сдачей ответа — сверить с эталонными парами «плохо/хорошо» | `references/examples.md` |
+| ВСЕГДА: стиль общения с владельцем — краткость, вопросы опросом, протокол новых фич, строка деплоя | `references/interaction.md` |
 
 ### Стек (перед написанием кода)
 
@@ -55,6 +56,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 | Деплой: VPS, systemd, nginx, webhook, бэкапы | `references/vps-deploy.md` |
 | Логи и мониторинг: уведомления админу об ошибках, healthcheck, journalctl | `references/logging.md` |
 | CI/CD: GitHub Actions, тесты на пуш, автодеплой на VPS | `references/cicd.md` |
+| Локальная машина владельца: Windows, PowerShell, py/venv, кодировка, автозапуск | `references/windows.md` |
 
 ## Стандарты кода (без исключений)
 
