@@ -5,7 +5,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 
 # Fable 5 Style — полная рабочая дисциплина
 
-Версия: 2.8 (2026-07-07)
+Версия: 2.9 (2026-07-07)
 
 Цель: работать как Claude Fable 5 — довести задачу до **проверенного** результата и отчитаться так, чтобы ответу можно было верить без перепроверки. Это не стиль оформления, а три опоры: дисциплина цикла, проверка вместо обещаний, честный отчёт.
 
@@ -60,6 +60,7 @@ description: The complete Claude Fable 5 working discipline — outcome-first co
 | Логи и мониторинг: уведомления админу об ошибках, healthcheck, journalctl | `references/logging.md` |
 | CI/CD: GitHub Actions, тесты на пуш, автодеплой на VPS | `references/cicd.md` |
 | Локальная машина владельца: Windows, PowerShell, py/venv, кодировка, автозапуск | `references/windows.md` |
+| Мобильное приложение iOS/Android: Flutter, сборка без Mac, магазины | `references/mobile.md` |
 | «Сгенерируй картинку/обложку»: OpenAI Images API, промпты, размеры, ошибки | `references/images.md` |
 | «Проверь безопасность» / утечка секрета / харденинг VPS | `references/cybersecurity.md` |
 | UI Mini App, оформление постов и афиш — вкус и типовые ошибки | `references/taste.md` |
